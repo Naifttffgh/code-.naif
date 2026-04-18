@@ -2,56 +2,39 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>جاري العرض...</title>
+    <title>معاينة لغة نايف</title>
     <style>
-        body { 
-            margin: 0; padding: 50px; font-family: 'Segoe UI', sans-serif; 
-            text-align: center; color: white; transition: background 0.8s ease;
-            background-color: #121212; /* لون افتراضي */
-        }
+        body { margin: 0; padding: 50px; text-align: center; color: white; font-family: sans-serif; transition: background 0.5s; background-color: #121212; }
         .block-container { display: flex; gap: 15px; justify-content: center; margin-top: 40px; flex-wrap: wrap; }
         .block { width: 80px; height: 80px; line-height: 80px; border-radius: 12px; font-weight: bold; }
-        .B1 { background: #ff4757; } .B2 { background: #2ed573; }
+        .B1 { background: #ff4757; } .B2 { background: #2ed573; } .B3 { background: #1e90ff; }
         .naif { background: linear-gradient(45deg, #00d4ff, #00ff00); border: 2px solid gold; min-width: 100px; }
-        #view-content { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; display: inline-block; margin-top: 20px; }
     </style>
 </head>
 <body>
-
-    <h1 id="view-title"></h1>
-    <div id="view-content"></div>
-    <div id="blocks-result" class="block-container"></div>
+    <h1 id="title"></h1>
+    <p id="content"></p>
+    <div id="blocks" class="block-container"></div>
 
     <script>
-        const rawCode = localStorage.getItem('pending_naif_code');
-
-        if (rawCode) {
+        const raw = localStorage.getItem('pending_naif_code');
+        if (raw) {
             try {
-                const data = JSON.parse(rawCode);
-
-                // تطبيق الأوامر
-                document.title = data.title || "مشروع نايف";
-                document.getElementById('view-title').innerText = data.title || "";
-                document.getElementById('view-content').innerText = data.content || "";
-
-                // سحر تغيير الخلفية (السطر اللي طلبت تعديله)
-                if (data.bg_color) {
-                    document.body.style.backgroundColor = data.bg_color;
-                }
-
-                // رسم المربعات
-                const result = document.getElementById('blocks-result');
+                const data = JSON.parse(raw);
+                document.title = data.title;
+                document.getElementById('title').innerText = data.title;
+                document.getElementById('content').innerText = data.content;
+                document.body.style.backgroundColor = data.bg_color || "#121212";
+                
                 if (data.blocks) {
                     data.blocks.forEach(id => {
                         const div = document.createElement('div');
                         div.className = 'block ' + id;
                         div.innerText = id;
-                        result.appendChild(div);
+                        document.getElementById('blocks').appendChild(div);
                     });
                 }
-            } catch (e) {
-                document.body.innerHTML = "<h1>⚠️ خطأ في الكود! تأكد من الأقواس والفواصل.</h1>";
-            }
+            } catch (e) { document.body.innerHTML = "<h1>خطأ في الكود!</h1>"; }
         }
     </script>
 </body>
