@@ -2,47 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>محرر لغة NAIF المطور 🛠️</title>
+    <title>بيئة تطوير NAIF المتكاملة 🛠️</title>
     <style>
         body { background: #1e1e1e; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
         textarea { 
-            width: 90%; height: 300px; background: #252526; color: #d4d4d4; 
+            width: 90%; height: 250px; background: #252526; color: #d4d4d4; 
             padding: 15px; border-radius: 10px; font-size: 18px; border: 1px solid #444;
             font-family: monospace;
         }
-        .controls { margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; }
-        button { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .send-btn { background: #007acc; color: white; }
+        .controls { margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .render-btn { background: #ff9f43; color: white; } /* زر التجربة */
+        .open-btn { background: #0fbcf9; color: white; }   /* زر الفتح */
+        .export-naif { background: #6f42c1; color: white; }
+        .export-html { background: #e84118; color: white; }
         .assistant-btn { background: #28a745; color: white; }
-        button:hover { opacity: 0.8; }
+        button:hover { transform: scale(1.05); opacity: 0.9; }
     </style>
 </head>
 <body>
-    <h1>محرر لغة NAIF v2.0 🚀</h1>
+    <h1>نظام برمجة NAIF 🚀</h1>
     
     <div class="controls">
-        <button class="assistant-btn" onclick="askAssistant()">🤖 مساعد نايف (كود جاهز)</button>
-        <button class="send-btn" onclick="convertToHTML()">تحويل وإرسال للموقع الثاني 📤</button>
+        <button class="assistant-btn" onclick="askAssistant()">🤖 كود جاهز</button>
+        <button class="open-btn" onclick="document.getElementById('file-input').click()">📂 فتح ملف .naif</button>
+        <button class="render-btn" onclick="previewRender()">👁️ تجربة العرض</button>
+        <button class="export-naif" onclick="exportNaifFile()">💾 حفظ بصيغة .naif</button>
+        <button class="export-html" onclick="exportHtmlFile()">🌐 تصدير صفحة ويب</button>
     </div>
 
-    <textarea id="naifCode" placeholder="اكتب كود .naif هنا أو استخدم المساعد..."></textarea>
+    <input type="file" id="file-input" style="display:none" accept=".naif" onchange="openNaifFile(this.files[0])">
+
+    <textarea id="naifCode" placeholder="اكتب كودك أو افتح ملفاً..."></textarea>
 
     <script>
         function askAssistant() {
             const suggestion = {
-                "title": "موقع نايف الأحمر",
-                "content": "أهلاً بك في لغة نايف.. الخلفية الآن حمراء!",
-                "bg_color": "#800000",
-                "blocks": ["B1", "B2", "naif", "B4"]
+                "title": "تجربة لغة نايف",
+                "content": "هذا الكود جاهز للتجربة أو التصدير!",
+                "bg_color": "#2c3e50",
+                "blocks": ["B1", "B2", "naif"]
             };
             document.getElementById('naifCode').value = JSON.stringify(suggestion, null, 2);
         }
 
-        function convertToHTML() {
+        // وظيفة فتح ملف .naif من الجهاز وعرضه في المحرر
+        function openNaifFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('naifCode').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+
+        // وظيفة إرسال الكود للرندر (الموقع الثاني) للتجربة
+        function previewRender() {
             const code = document.getElementById('naifCode').value;
-            if(!code) return alert("اكتب كود أولاً!");
+            if(!code) return alert("اكتب أو افتح كود أولاً!");
             localStorage.setItem('pending_naif_code', code);
             window.open('reader.html', '_blank');
+        }
+
+        function exportNaifFile() {
+            const code = document.getElementById('naifCode').value;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my_code.naif';
+            a.click();
+        }
+
+        function exportHtmlFile() {
+            const code = document.getElementById('naifCode').value;
+            if(!code) return alert("لا يوجد كود!");
+            const fullHtml = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تصدير نايف</title><style>body { margin: 0; padding: 50px; text-align: center; color: white; font-family: sans-serif; transition: 0.8s; }.block-container { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }.block { width: 80px; height: 80px; line-height: 80px; border-radius: 12px; font-weight: bold; }.B1 { background: #ff4757; } .B2 { background: #2ed573; } .B3 { background: #1e90ff; }.naif { background: linear-gradient(45deg, #00d4ff, #00ff00); border: 2px solid gold; min-width: 100px; }</style></head><body><script>const data = ${code}; document.title = data.title; document.body.style.backgroundColor = data.bg_color || "#121212"; document.write('<h1>' + data.title + '</h1><p>' + data.content + '</p><div class="block-container">'); data.blocks.forEach(id => { document.write('<div class="block ' + id + '">' + id + '</div>'); }); document.write('</div>');<\/script></body></html>`;
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'naif_site.html';
+            a.click();
         }
     </script>
 </body>
