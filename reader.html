@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري التحميل...</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 50px; 
+            font-family: 'Segoe UI', sans-serif; 
+            text-align: center; 
+            transition: background 0.5s ease; /* تنعيم تغيير اللون */
+            color: white;
+        }
+        #view-title { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        #view-content { font-size: 1.5rem; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; display: inline-block; }
+        
+        .block-container { display: flex; gap: 15px; justify-content: center; margin-top: 40px; flex-wrap: wrap; }
+        .block { width: 80px; height: 80px; line-height: 80px; border-radius: 12px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        
+        /* تعريف الألوان الخاصة بلغة نايف */
+        .B1 { background: #ff4757; }
+        .B2 { background: #2ed573; }
+        .B3 { background: #1e90ff; }
+        .B4 { background: #ffa502; } /* لون برتقالي جديد لـ B4 */
+        
+        /* تصميم ملكي خاص بكلمة naif */
+        .naif { 
+            background: linear-gradient(45deg, #00d4ff, #00ff00); 
+            min-width: 120px; 
+            border: 2px solid gold;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #00d4ff; }
+            to { box-shadow: 0 0 25px #00ff00; }
+        }
+    </style>
+</head>
+<body id="render-body">
+
+    <h1 id="view-title"></h1>
+    <div id="view-content"></div>
+    <div id="blocks-result" class="block-container"></div>
+
+    <script>
+        // 1. استلام الكود من الذاكرة (LocalStorage)
+        const rawCode = localStorage.getItem('pending_naif_code');
+
+        if (rawCode) {
+            try {
+                // 2. التحليل (Parsing) - تحويل النص لبيانات
+                const data = JSON.parse(rawCode);
+
+                // 3. التنفيذ (Execution)
+                
+                // أ- تغيير العنوان في التاب وفي الصفحة
+                document.title = data.title || "مشروع نايف";
+                document.getElementById('view-title').innerText = data.title || "بدون عنوان";
+                
+                // ب- تغيير المحتوى النصي
+                document.getElementById('view-content').innerText = data.content || "";
+
+                // ج- تغيير لون خلفية الموقع إذا كان موجود في الملف
+                if (data.bg_color) {
+                    document.body.style.backgroundColor = data.bg_color;
+                } else {
+                    document.body.style.backgroundColor = "#121212"; // لون افتراضي
+                }
+
+                // د- رسم المربعات والكلمات الخاصة
+                const result = document.getElementById('blocks-result');
+                if (data.blocks) {
+                    data.blocks.forEach(id => {
+                        const div = document.createElement('div');
+                        div.className = 'block ' + id; // يربط اسم المربع بتصميم الـ CSS
+                        div.innerText = id;
+                        result.appendChild(div);
+                    });
+                }
+
+                // تنظيف الذاكرة (اختياري)
+                // localStorage.removeItem('pending_naif_code');
+
+            } catch (e) {
+                document.body.innerHTML = "<h1 style='color:red;'>⚠️ خطأ في قراءة ملف .naif! راجع الأقواس والفواصل.</h1>";
+            }
+        } else {
+            document.body.innerHTML = "<h1>لم يتم استلام أي كود.. ارجع للمحرر واضغط إرسال.</h1>";
+        }
+    </script>
+</body>
+</html>
